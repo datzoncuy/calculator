@@ -1,9 +1,0 @@
-# Android / Gradle
-.gradle/
-**/.gradle/
-**/build/
-local.properties
-*.iml
-.idea/
-.DS_Store
-Thumbs.db
