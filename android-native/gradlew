@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+# Lightweight wrapper bootstrap. Uses local Gradle if available, otherwise downloads Gradle 8.9.
+set -eu
+VERSION="8.9"
+if command -v gradle >/dev/null 2>&1; then
+  exec gradle "$@"
+fi
+if [ -n "${GRADLE_HOME:-}" ] && [ -x "$GRADLE_HOME/bin/gradle" ]; then
+  exec "$GRADLE_HOME/bin/gradle" "$@"
+fi
+BASE="${GRADLE_USER_HOME:-$HOME/.gradle}/datzon-wrapper"
+DIST="$BASE/gradle-$VERSION"
+ARCHIVE="$BASE/gradle-$VERSION-bin.zip"
+mkdir -p "$BASE"
+if [ ! -x "$DIST/bin/gradle" ]; then
+  if [ ! -f "$ARCHIVE" ]; then
+    if command -v curl >/dev/null 2>&1; then curl -fL "https://services.gradle.org/distributions/gradle-$VERSION-bin.zip" -o "$ARCHIVE"
+    elif command -v wget >/dev/null 2>&1; then wget "https://services.gradle.org/distributions/gradle-$VERSION-bin.zip" -O "$ARCHIVE"
+    else echo "Install Gradle or curl/wget to download Gradle $VERSION." >&2; exit 1; fi
+  fi
+  unzip -q -o "$ARCHIVE" -d "$BASE"
+fi
+exec "$DIST/bin/gradle" "$@"
